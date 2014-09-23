@@ -8,8 +8,17 @@
     "prepublish": "coffee --bare --compile domineer.coffee"
   },
 
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MiffOttah/domineer.js"
+  },
+
+  "bugs": {
+    "url": "https://github.com/MiffOttah/domineer.js/issues"
+  },
+
   "private": true,
   "dependencies": {
     "jsdom": "~1.0.0-pre.7"
-  },
+  }
 }
