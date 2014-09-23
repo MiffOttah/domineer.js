@@ -1,0 +1,15 @@
+{
+  "name": "domineer.js",
+  "description": "A DOM and HTML based templating engine.",
+  "version": "0.1.0",
+  "author": "MiffTheFox",
+
+  "scripts": {
+    "prepublish": "coffee --bare --compile domineer.coffee"
+  },
+
+  "private": true,
+  "dependencies": {
+    "jsdom": "~1.0.0-pre.7"
+  },
+}
