@@ -1,7 +1,7 @@
 'use strict';
 
 var now = new Date();
-var domineer = require('./domineer').create({ 
+var domineer = require('./domineer/domineer').create({ 
     templateDirectory: __dirname + '/templates'
 });
 
