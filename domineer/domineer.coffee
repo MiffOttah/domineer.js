@@ -25,47 +25,72 @@ class DomineerEngine
     constructor: (@templateDirectory) ->
 
     templateSuffix: ''
+    maxDepth = 10
 
     render: (templateFile, templateParametersArray..., callback) ->
-        templateParameters = if templateParametersArray.length >= 1 then templateParametersArray[0] else null
-        childState = if templateParametersArray.length >= 2 then templateParametersArray[1] else null
-        throw new Error('Too many arguments for render().') if templateParametersArray.length > 2
+        try
+            templateParameters = if templateParametersArray.length >= 1 then templateParametersArray[0] else null
+            childState = if templateParametersArray.length >= 2 then templateParametersArray[1] else null
+            throw new Error('Too many arguments for render().') if templateParametersArray.length > 2
 
-        templateFile = path.join @templateDirectory, (templateFile + @templateSuffix)
+            templateFile = path.join @templateDirectory, (templateFile + @templateSuffix)
 
-        fs.readFile templateFile, (err, data) =>
-            if err
-                callback err, null
-            else
-                @renderTemplateHtml data, templateParameters, callback
+            fs.readFile templateFile, (err, data) =>
+                if err
+                    callback err, null
+                else
+                    @renderTemplateHtml data, templateParameters, childState, callback
+        catch err
+            callback err, null
+        
 
     renderTemplateHtml: (templateHtml, templateParametersArray..., callback) ->
-        templateParameters = if templateParametersArray.length >= 1 then templateParametersArray[0] else null
-        childState = if templateParametersArray.length >= 2 then templateParametersArray[1] else null
-        throw new Error('Too many arguments for renderTemplateHtml().') if templateParametersArray.length > 2
+        try
+            templateParameters = if templateParametersArray.length >= 1 then templateParametersArray[0] else null
+            childState = if templateParametersArray.length >= 2 then templateParametersArray[1] else null
+            throw new Error('Too many arguments for renderTemplateHtml().') if templateParametersArray.length > 2
 
-        jsdom.env({
-            html: templateHtml
-            scripts: []
+            throw new Error('Maximum template depth exceeded') if childState and childState.depth > maxDepth
 
-            done: (errors, window) ->
-                if errors
-                    callback errors, null
-                else
-                    processor = new DomineerDocumentProcessor window, templateParameters
-                    processor.childState = childState
-                    for rootNode in shallowCopy(window.document.childNodes)
-                        processor.processNode rootNode
-                    html = jsdom.serializeDocument window.document
-                    callback null, html
-                true
-        })
+            engine = this
+
+            jsdom.env({
+                html: templateHtml
+                scripts: []
+
+                done: (errors, window) ->
+                    if errors
+                        callback errors, null
+                    else
+                        processor = new DomineerDocumentProcessor window, templateParameters, childState
+
+                        inheritsElements = window.document.getElementsByTagName 'inherits'
+
+                        if inheritsElements.length == 0
+                            for rootNode in shallowCopy(window.document.childNodes)
+                                processor.processNode rootNode
+
+                            html = jsdom.serializeDocument window.document
+                            callback null, html
+                        else if inheritsElements.length == 1
+                            from = inheritsElements[0].getAttribute 'from'
+                            throw new Error 'No from attribute given for an <inherits> element.' unless from
+
+                            processor.processNode inheritsElements[0]
+
+                            newChildState = new ChildState(inheritsElements[0].innerHTML.trim(), if childState? then (childState.depth + 1) else 0)
+                            engine.render from, processor.templateParameters, newChildState, callback
+                        else
+                            throw new Error 'Only one <inherits> element is permitted per template.'
+                    true
+            })
+        catch err
+            callback err, null
 
 class DomineerDocumentProcessor
-    constructor: (@window, @templateParameters) ->
+    constructor: (@window, @templateParameters, @childState) ->
 
     locals: {}
-    childState = null
 
     processNode: (node) ->
         if node.nodeType == 1 # element
@@ -75,8 +100,8 @@ class DomineerDocumentProcessor
 
             # Insert childcontent
             for childContentNode in node.getElementsByTagName 'childcontent'
-                if childState
-                    childContentNode.innerHTML = childState.content
+                if @childState
+                    childContentNode.innerHTML = @childState.content
                 removeNodePreservingChildren childContentNode
 
             # Process setup elements
@@ -143,7 +168,6 @@ class DomineerDocumentProcessor
                         childNode.removeAttribute attribute.name
 
             node.removeChild evalNode
-            node.outerHTML
         null
 
     processIf: (ifNode) ->
@@ -193,8 +217,9 @@ removeNodePreservingChildren = (node) ->
 
 
 create = (options) ->
-    engine = new DomineerEngine (options.templateDirectory or '.')
+    engine = new DomineerEngine(options.templateDirectory or '.')
     engine.templateSuffix = options.templateSuffix or '.html'
+    engine.maxDepth = options.maxDepth or 10
     return engine
 
 module.exports = { create }

@@ -4,8 +4,8 @@
     <meta charset="utf-8">
     <title>domineer.js demo site</title>
     <setup>
-        if (locals.title){
-           document.title += locals.title + ' - domineer.js demo site';
+        if (this.title){
+           document.title = this.title + ' - ' + document.title;
         }
     </setup>
 </head>

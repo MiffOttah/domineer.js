@@ -15,9 +15,13 @@ The `domineer` package exports an object with a single function: `create()`.
 
 * `templateDirectory`
 * * The directory in which the template files are stored. Defaults to `'.'`.
+
 * `templateSuffix`
 * * The string appended to every template name to get the name of the template
     file. Defaults to `'.html'`.
+
+* `maxDepth`
+* * The maximum number of templates that can be nested. Defaults to `10`.
 
 The `create` function returns an object with the following methods:
 
@@ -125,6 +129,38 @@ where `name` is the name of the tag. For example.
 
     <setup>this.example = 42;</setup>
     <input name="example" jsvalue>
+
+childcontent
+------------
+
+In a parent template, will be substitued by the content of the child that
+inherits from it. If the parent template is being rendered itself, then the
+contents of the `<childcontent>` element will replace it instead.
+
+    <!DOCTYPE html>
+    <html>
+        <head>
+            <meta charset="utf-8">
+            <title><expr>this.title || "(Untitled)"</expr></title>
+        </head>
+        <body>
+            <h1>Example site</h1>
+            <childcontent><p>(There is no content on this page.)</p></childcontent>
+        </body>
+    </html>
+
+inherit
+-------
+
+Specifies that this template inherits from a parent template. There is one
+attribute, `from`, that specifies
+
+This element may only be used as the root of a template.
+
+    <inherits from="_parent">
+        <setup>this.title = "Example"</setup>
+        <p>This is an example page!</p>
+    </inherits>
 
 FAQ
 ===
