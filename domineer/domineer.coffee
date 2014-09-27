@@ -27,8 +27,9 @@ class DomineerEngine
     templateSuffix: ''
 
     render: (templateFile, templateParametersArray..., callback) ->
-        templateParameters = if templateParametersArray.length >= 0 then templateParametersArray[0] else null
-        throw new Error('Too many arguments for render().') if templateParametersArray.length > 1
+        templateParameters = if templateParametersArray.length >= 1 then templateParametersArray[0] else null
+        childState = if templateParametersArray.length >= 2 then templateParametersArray[1] else null
+        throw new Error('Too many arguments for render().') if templateParametersArray.length > 2
 
         templateFile = path.join @templateDirectory, (templateFile + @templateSuffix)
 
@@ -39,8 +40,9 @@ class DomineerEngine
                 @renderTemplateHtml data, templateParameters, callback
 
     renderTemplateHtml: (templateHtml, templateParametersArray..., callback) ->
-        templateParameters = if templateParametersArray.length >= 0 then templateParametersArray[0] else null
-        throw new Error('Too many arguments for renderTemplateHtml().') if templateParametersArray.length > 1
+        templateParameters = if templateParametersArray.length >= 1 then templateParametersArray[0] else null
+        childState = if templateParametersArray.length >= 2 then templateParametersArray[1] else null
+        throw new Error('Too many arguments for renderTemplateHtml().') if templateParametersArray.length > 2
 
         jsdom.env({
             html: templateHtml
@@ -51,6 +53,7 @@ class DomineerEngine
                     callback errors, null
                 else
                     processor = new DomineerDocumentProcessor window, templateParameters
+                    processor.childState = childState
                     for rootNode in shallowCopy(window.document.childNodes)
                         processor.processNode rootNode
                     html = jsdom.serializeDocument window.document
@@ -62,12 +65,19 @@ class DomineerDocumentProcessor
     constructor: (@window, @templateParameters) ->
 
     locals: {}
+    childState = null
 
     processNode: (node) ->
         if node.nodeType == 1 # element
             document = @window.document
             evalNode = document.createElement 'div'
             node.appendChild evalNode
+
+            # Insert childcontent
+            for childContentNode in node.getElementsByTagName 'childcontent'
+                if childState
+                    childContentNode.innerHTML = childState.content
+                removeNodePreservingChildren childContentNode
 
             # Process setup elements
             for setupNode in node.getElementsByTagName 'setup'
@@ -162,6 +172,11 @@ class DomineerDocumentProcessor
             return eval($domineer_expression)
         f.call @templateParameters
 
+class ChildState
+    constructor: (@content, depth) ->
+        @depth = 10 if depth?
+    content: ''
+    depth: 10
 
 shallowCopy = (collection) ->
     if collection.length
