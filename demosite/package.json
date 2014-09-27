@@ -1,0 +1,20 @@
+{
+  "name": "domineer-demo",
+  "description": "A quick site to demonstrate domineer.js.",
+  "version": "0.1.0",
+  "author": "MiffTheFox",
+  "scripts": {
+    "prepublish": "coffee --bare --compile index.coffee"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MiffOttah/domineer.js"
+  },
+  "bugs": {
+    "url": "https://github.com/MiffOttah/domineer.js/issues"
+  },
+  "private": true,
+  "dependencies": {
+    "express": "~4.9.4"
+  }
+}

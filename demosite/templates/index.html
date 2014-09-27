@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>domineer.js demo site</title>
+</head>
+<body>
+    <h1>domineer.js demo site</h1>
+    <p>
+        This is a little site that can demonstrate some <b>domineer.js</b>
+        techniques. Choose your destiny below.
+    </p>
+    <ul>
+        <foreach in="this.templates" as="template">
+            <li><a $href="'/' + locals.template + '.html'"><expr>locals.template</expr></a></li>
+        </foreach>
+    </ul>
+</body>
+</html>
