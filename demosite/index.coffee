@@ -1,33 +1,20 @@
 fs = require 'fs'
 
-domineer = require('../domineer/domineer').create({ 
-    templateDirectory: __dirname + '/templates'
-});
-
-templates = fs.readdirSync(domineer.templateDirectory).map((filename) -> filename.replace /\.html$/, '')
-
 app = (require 'express')()
+app.engine 'domineer', require('../domineer/domineer').__express
+app.set 'views', __dirname + '/templates'
+app.set 'view engine', 'domineer'
+
+templates = fs.readdirSync(__dirname + '/templates').map((filename) -> filename.replace /\.domineer$/, '')
 
 app.get '/', (req, res) ->
-    domineer.render 'index', { templates }, (error, html) ->
-        if error
-            console.warn error
-            res.send 'Something went wrong. :('
-        else
-            res.send html
+    res.render 'index', { templates }
 
 app.get '/:template.html', (req, res) ->
-    templateToShow = req.param('template')
+    templateToShow = req.param 'template'
     if templateToShow in templates
         templateParameters = { templates }
-        
-        domineer.render templateToShow, templateParameters, (error, html) ->
-            if error
-                console.warn error
-                res.send 'Something went wrong. :('
-            else
-                res.send html
-
+        res.render templateToShow, templateParameters
     else
         res.send 'Template not found!'
 

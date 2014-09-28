@@ -27,13 +27,27 @@ class DomineerEngine
     templateSuffix: ''
     maxDepth = 10
 
-    render: (templateFile, templateParametersArray..., callback) ->
+    render: (templateName, templateParametersArray..., callback) ->
         try
             templateParameters = if templateParametersArray.length >= 1 then templateParametersArray[0] else null
             childState = if templateParametersArray.length >= 2 then templateParametersArray[1] else null
             throw new Error('Too many arguments for render().') if templateParametersArray.length > 2
 
-            templateFile = path.join @templateDirectory, (templateFile + @templateSuffix)
+            templateFile = path.join @templateDirectory, (templateName + @templateSuffix)
+
+            fs.readFile templateFile, (err, data) =>
+                if err
+                    callback err, null
+                else
+                    @renderTemplateHtml data, templateParameters, childState, callback
+        catch err
+            callback err, null
+
+    renderTemplateFile: (templateFile, templateParametersArray..., callback) ->
+        try
+            templateParameters = if templateParametersArray.length >= 1 then templateParametersArray[0] else null
+            childState = if templateParametersArray.length >= 2 then templateParametersArray[1] else null
+            throw new Error('Too many arguments for render().') if templateParametersArray.length > 2
 
             fs.readFile templateFile, (err, data) =>
                 if err
@@ -217,9 +231,17 @@ removeNodePreservingChildren = (node) ->
 
 
 create = (options) ->
+    options ?= {}
     engine = new DomineerEngine(options.templateDirectory or '.')
     engine.templateSuffix = options.templateSuffix or '.html'
     engine.maxDepth = options.maxDepth or 10
     return engine
 
-module.exports = { create }
+__expressEngine = null
+__express = (templateFile, templateParameters, callback) -> 
+    unless __expressEngine
+        __expressEngine = create({ templateSuffix: '.domineer' })
+    __expressEngine.templateDirectory = path.dirname templateFile
+    __expressEngine.renderTemplateFile templateFile, templateParameters, callback
+
+module.exports = { create, __express }

@@ -1,7 +1,7 @@
 {
   "name": "domineer.js",
   "description": "A DOM and HTML based templating engine.",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "author": "MiffTheFox",
 
   "scripts": {

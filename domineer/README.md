@@ -25,12 +25,16 @@ The `domineer` package exports an object with a single function: `create()`.
 
 The `create` function returns an object with the following methods:
 
-    render(templateFile, [templateParameters], callback)
+    render(templateName, [templateParameters], callback)
+    renderTemplateFile(templateFile, [templateParameters], callback)
     renderTemplateHtml(templateHtml, [templateParameters], callback)
 
-* `templateFile`
+* `templateName`
 * * The name of the template file to render, relative to `templateDirectory`
-   and with `templateSuffix` appended.
+    and with `templateSuffix` appended.
+
+* `templateFile`
+* * The full name of the template file to render.
 
 * `templateHtml`
 * * The raw HTML source code for the template to render.

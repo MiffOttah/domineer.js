@@ -6,7 +6,7 @@ domineer.js
 > inherently “clean”. What you need to do is speak the language: use
 > placeholders with SQL, use argument lists when spawning processes, etc.
 
--- [Eevee](http://eev.ee/blog/2012/04/09/php-a-fractal-of-bad-design/#language-boundaries)
+&mdash; [Eevee](http://eev.ee/blog/2012/04/09/php-a-fractal-of-bad-design/#language-boundaries)
 
 Do you know what does it mean?
 ------------------------------
@@ -45,19 +45,18 @@ Foreach
 Complex functions. Anything that evaluates to a value in JavaScript can be used
 in **domineer.js**!
 
-    <p><expr>this.n</expr>! = <expr>(function(){
+    <p>The factorial of <expr>this.n</expr> is <expr>(function(){
         var value = 1;
         for (var i = 1; i &lt; this.n; i++){
             value *= i;
         }
         return value;
-    }).apply(this)</expr>
+    }).apply(this)</expr>.</p>
 
-Future plans
+More details
 ------------
 
-* Template inheritance
-* Express.js integration
+The full documentation is available at https://github.com/MiffOttah/domineer.js/blob/master/domineer/README.md
 
 Copyright
 ---------
