@@ -153,8 +153,8 @@ contents of the `<childcontent>` element will replace it instead.
         </body>
     </html>
 
-inherit
--------
+inherits
+--------
 
 Specifies that this template inherits from a parent template. There is one
 attribute, `from`, that specifies
@@ -169,6 +169,16 @@ This element may only be used as the root of a template.
 FAQ
 ===
 
+How do I set an attribute programatically?
+------------------------------------------
+
+By prefixing an attribute of a regular (non-**domineer.js**) HTML tag, with a
+dollar sign (`$`), the value of the attribute is evaluated as JavaScript. The
+result of th evaluation becomes the value of the attribute (without the dollar
+sign).
+
+    <a $href="this.profile.url">My website</a>
+
 How do I set the title progamatically?
 --------------------------------------
 
@@ -178,7 +188,48 @@ specify a title at runtime, set `document.title` in a `<setup>` or
 
     <title>My Website</title>
     <setup>
-        if (locals.title){
-           document.title += locals.title + ' - ' + document.title;
+        if (this.title){
+           document.title += this.title + ' - ' + document.title;
         }
     </setup>
+
+What do `this` and `locals` mean?
+---------------------------------
+
+`this` refers to the template parameters, the optional argument you passed
+into one of the three rendering functions.
+
+`locals` is scratch space for your page to store values. For example, you may
+use a `<setup>` tag to store a function or the result of a computation in the
+`locals` object, and reference it in later `<expr>` tags. `locals` is also used
+by the `<foreach>` tag to store the loop variable.
+
+Unlike `this`, `locals` is not passed up to parent templates. To pass an object
+through to the parent template, use `this`.
+
+Can I use **domineer.js** with express.js?
+------------------------------------------
+
+**domineer.js** exports an `__express` function, so that it is immediately
+usable with express.js. Per express.js convention, your templates are expected
+to end with the `.domineer` suffix, and parent templates are relative to the
+child template instead of based in a fixed directory.
+
+If you wish to use custom **domineer.js** options with express.js, you may pass
+your **domineer.js** rendering object's `renderTemplateFile` function to
+`app.engine`. For example, here is a method for setting up **domineer.js** using
+a specific directory for finding templates. (Note that this only effects
+templates that other templates are looking for via the `inherits` tag.
+express.js uses the `'views'` application setting to find templates, and passes
+the full path of the template file to **domineer.js**.)
+
+    domineer = require('domineer').create({
+        templateDirectory = __dirname + '/templates',
+        templateSuffix = 'domineer'
+    });
+
+    app = require('express')();
+    app.engine('domineer', domineer.renderTemplateFile);
+    app.set('views', domineer.templateDirectory);
+    app.set('view engine', 'domineer');
+
