@@ -1,0 +1,9 @@
+<inherits from="parent">
+    <setup>
+        this.title = 'Coin toss';
+        locals.result = Math.random()
+    </setup>
+    <p>We'll flip a coin with Math.random()!</p>
+    <p>The coin landed on <b><if test="locals.result > 0.5">heads<elseif test="locals.result > 0.01">tails<else>edge</else></elseif></if></b>!</p>
+    <p><a href="?">Flip again?</a></p>
+</inherits>
