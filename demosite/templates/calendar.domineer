@@ -1,0 +1,55 @@
+<inherits from="parent">
+    <setup>
+        // This is probably more suited for being done in the controller rather than the view! ^^;
+
+        locals.calendar = {};
+
+        var d = new Date();
+        var months = ['January', 'Feburary', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+        var month = d.getMonth();
+
+        // Get the month and year
+        locals.calendar.month = months[month];
+        locals.calendar.year = d.getFullYear();
+        locals.calendar.today = d.getDate();
+
+        // Start figuring out the weeks
+        locals.calendar.weeks = [];
+        var currentWeek = [];
+        d.setDate(1);
+
+        while (d.getMonth() === month){
+            currentWeek[d.getDay()] = d.getDate();
+
+            // Is this the last day of the week?
+            if (d.getDay() === 6){
+                locals.calendar.weeks.push(currentWeek);
+                currentWeek = [];
+            }
+
+            // Increment the day
+            d.setDate(d.getDate() + 1);
+        }
+
+        // Is there more in this week that hasn't been pushed?
+        if (currentWeek.length !== 0){
+            locals.calendar.weeks.push(currentWeek);
+        }
+    </setup>
+    <table>
+        <caption style="font-weight: bold">
+            <expr>locals.calendar.month + ' ' + locals.calendar.year</expr>
+        </caption>
+        <tr><td>S</td><td>M</td><td>T</td><td>W</td><td>T</td><td>F</td><td>S</td></tr>
+        <foreach in="locals.calendar.weeks" as="week">
+            <tr $data-week="JSON.stringify(locals.week)">
+                <foreach in="locals.week" as="day">
+                    <td><expr>locals.day || '-'</expr></td>
+                </foreach>
+            </tr>
+        </foreach>
+    </table>
+
+    <pre><expr>JSON.stringify(locals.calendar)</expr></pre>
+</inherits>
